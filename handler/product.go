@@ -68,7 +68,7 @@ func (p *service) getAll(w http.ResponseWriter, r *http.Request) {
 
 // getByID is used for get by ID a product
 func (p *service) getByID(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodDelete {
+	if r.Method != http.MethodGet {
 		res := newResponse(Error, "Disallowed method", nil)
 		responseJSON(w, http.StatusBadRequest, *res)
 		return

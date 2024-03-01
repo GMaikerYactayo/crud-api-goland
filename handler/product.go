@@ -9,18 +9,18 @@ import (
 	"time"
 )
 
-// service of product
-type service struct {
+// productService of product
+type productService struct {
 	storage Storage
 }
 
-// newService return a pinter of service
-func newService(s Storage) *service {
-	return &service{s}
+// newProductService return a pinter of productService
+func newProductService(s Storage) *productService {
+	return &productService{s}
 }
 
 // create is used for create a product
-func (p *service) create(w http.ResponseWriter, r *http.Request) {
+func (p *productService) create(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		res := newResponse(Error, "Disallowed method", nil)
 		responseJSON(w, http.StatusBadRequest, *res)
@@ -48,7 +48,7 @@ func (p *service) create(w http.ResponseWriter, r *http.Request) {
 }
 
 // getAll is used for get all products
-func (p *service) getAll(w http.ResponseWriter, r *http.Request) {
+func (p *productService) getAll(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
 		res := newResponse(Error, "Disallowed method", nil)
 		responseJSON(w, http.StatusBadRequest, *res)
@@ -67,7 +67,7 @@ func (p *service) getAll(w http.ResponseWriter, r *http.Request) {
 }
 
 // getByID is used for get by ID a product
-func (p *service) getByID(w http.ResponseWriter, r *http.Request) {
+func (p *productService) getByID(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
 		res := newResponse(Error, "Disallowed method", nil)
 		responseJSON(w, http.StatusBadRequest, *res)
@@ -93,7 +93,7 @@ func (p *service) getByID(w http.ResponseWriter, r *http.Request) {
 }
 
 // update is used for update a product
-func (p *service) update(w http.ResponseWriter, r *http.Request) {
+func (p *productService) update(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPut {
 		res := newResponse(Error, "Disallowed method", nil)
 		responseJSON(w, http.StatusBadRequest, *res)
@@ -132,7 +132,7 @@ func (p *service) update(w http.ResponseWriter, r *http.Request) {
 }
 
 // delete is used for delete a product
-func (p *service) delete(w http.ResponseWriter, r *http.Request) {
+func (p *productService) delete(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodDelete {
 		res := newResponse(Error, "Disallowed method", nil)
 		responseJSON(w, http.StatusBadRequest, *res)

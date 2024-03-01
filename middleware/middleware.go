@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"github.com/GMaikerYactayo/crud-api-goland/authorization"
 	"log"
 	"net/http"
 	"time"
@@ -17,8 +18,9 @@ func Log(f func(http.ResponseWriter, *http.Request)) func(http.ResponseWriter, *
 
 func Authentication(f func(http.ResponseWriter, *http.Request)) func(http.ResponseWriter, *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
-		toke := r.Header.Get("Authorization")
-		if toke != "token-test" {
+		token := r.Header.Get("Authorization")
+		_, err := authorization.ValidateToken(token)
+		if err != nil {
 			forbidden(w, r)
 			return
 		}

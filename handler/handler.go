@@ -13,3 +13,7 @@ type Storage interface {
 	Update(int, *model.Product) error
 	Delete(int) error
 }
+
+type UserStorage interface {
+	ValidateCredentials(email, password string) (*model.User, error)
+}

@@ -1,10 +1,10 @@
 package handler
 
 import (
-	"encoding/json"
 	"errors"
 	"github.com/GMaikerYactayo/crud-api-goland/authorization"
 	"github.com/GMaikerYactayo/crud-api-goland/model"
+	"github.com/labstack/echo"
 	"net/http"
 )
 
@@ -18,42 +18,31 @@ func newLoginService(s UserStorage) *loginService {
 	return &loginService{s}
 }
 
-func (l *loginService) login(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPost {
-		res := newResponse(Error, "Disallowed method", nil)
-		responseJSON(w, http.StatusBadRequest, *res)
-		return
-	}
-
+func (l *loginService) login(c echo.Context) error {
 	data := model.Login{}
-	err := json.NewDecoder(r.Body).Decode(&data)
+	err := c.Bind(&data)
 	if err != nil {
 		res := newResponse(Error, "Invalid structure", nil)
-		responseJSON(w, http.StatusBadRequest, *res)
-		return
+		return c.JSON(http.StatusBadRequest, res)
 	}
 
 	_, err = l.storage.ValidateCredentials(data.Email, data.Password)
 	if err != nil {
 		if errors.Is(err, model.ErrUserNotExists) {
 			res := newResponse(Error, "User not found or invalid credentials", nil)
-			responseJSON(w, http.StatusUnauthorized, *res)
-			return
+			return c.JSON(http.StatusUnauthorized, res)
 		}
-		// other error
 		res := newResponse(Error, "Error validating credentials", nil)
-		responseJSON(w, http.StatusInternalServerError, *res)
-		return
+		return c.JSON(http.StatusInternalServerError, res)
 	}
 
 	token, err := authorization.GenerateToken(&data)
 	if err != nil {
 		res := newResponse(Error, "Cannot generate token", nil)
-		responseJSON(w, http.StatusInternalServerError, *res)
-		return
+		return c.JSON(http.StatusInternalServerError, res)
 	}
 
 	dataToken := map[string]string{"token": token}
 	res := newResponse(Message, "Ok", dataToken)
-	responseJSON(w, http.StatusOK, *res)
+	return c.JSON(http.StatusOK, *res)
 }

@@ -4,8 +4,9 @@ import (
 	"github.com/GMaikerYactayo/crud-api-goland/authorization"
 	"github.com/GMaikerYactayo/crud-api-goland/handler"
 	"github.com/GMaikerYactayo/crud-api-goland/storage"
+	"github.com/labstack/echo"
+	"github.com/labstack/echo/middleware"
 	"log"
-	"net/http"
 )
 
 func main() {
@@ -21,12 +22,14 @@ func main() {
 		log.Fatalf("DAOProduct: %v", err)
 	}
 
-	mux := http.NewServeMux()
+	e := echo.New()
+	e.Use(middleware.Recover())
+	e.Use(middleware.Logger())
 
-	handler.RouteProduct(mux, myStorage)
+	handler.RouteProduct(e, myStorage)
 
 	log.Println("Server initialized on port 8080")
-	err = http.ListenAndServe(":8080", mux)
+	err = e.Start(":8080")
 	if err != nil {
 		log.Printf("error en el servidor: %v\n", err)
 	}

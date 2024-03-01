@@ -1,9 +1,10 @@
 package handler
 
+import "C"
 import (
-	"encoding/json"
 	"errors"
 	"github.com/GMaikerYactayo/crud-api-goland/model"
+	"github.com/labstack/echo"
 	"net/http"
 	"strconv"
 	"time"
@@ -20,143 +21,104 @@ func newProductService(s Storage) *productService {
 }
 
 // create is used for create a product
-func (p *productService) create(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPost {
-		res := newResponse(Error, "Disallowed method", nil)
-		responseJSON(w, http.StatusBadRequest, *res)
-		return
-	}
-
+func (p *productService) create(c echo.Context) error {
 	data := model.Product{}
 	data.CreateAt = time.Now()
-	err := json.NewDecoder(r.Body).Decode(&data)
+	err := c.Bind(&data)
 	if err != nil {
 		res := newResponse(Error, "The product does not have a correct structure.", nil)
-		responseJSON(w, http.StatusBadRequest, *res)
-		return
+		return c.JSON(http.StatusBadRequest, res)
 	}
 
 	err = p.storage.Create(&data)
 	if err != nil {
 		res := newResponse(Error, "Problem creating product", nil)
-		responseJSON(w, http.StatusInternalServerError, *res)
-		return
+		return c.JSON(http.StatusInternalServerError, res)
 	}
 
 	res := newResponse(Message, "Product created successfully", nil)
-	responseJSON(w, http.StatusCreated, *res)
+	return c.JSON(http.StatusCreated, res)
 }
 
 // getAll is used for get all products
-func (p *productService) getAll(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodGet {
-		res := newResponse(Error, "Disallowed method", nil)
-		responseJSON(w, http.StatusBadRequest, *res)
-		return
-	}
-
+func (p *productService) getAll(c echo.Context) error {
 	data, err := p.storage.GetAll()
 	if err != nil {
 		res := newResponse(Error, "Error getting products", nil)
-		responseJSON(w, http.StatusInternalServerError, *res)
-		return
+		return c.JSON(http.StatusInternalServerError, *res)
 	}
 
 	res := newResponse(Message, "Ok", data)
-	responseJSON(w, http.StatusOK, *res)
+	return c.JSON(http.StatusOK, *res)
 }
 
 // getByID is used for get by ID a product
-func (p *productService) getByID(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodGet {
-		res := newResponse(Error, "Disallowed method", nil)
-		responseJSON(w, http.StatusBadRequest, *res)
-		return
-	}
-
-	ID, err := strconv.Atoi(r.URL.Query().Get("id"))
+func (p *productService) getByID(c echo.Context) error {
+	ID, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
 		res := newResponse(Error, "The ID must be numerical", nil)
-		responseJSON(w, http.StatusBadRequest, *res)
-		return
+		return c.JSON(http.StatusBadRequest, res)
 	}
 
 	data, err := p.storage.GetByID(ID)
 	if err != nil {
 		res := newResponse(Error, "Problem getting product", nil)
-		responseJSON(w, http.StatusInternalServerError, *res)
-		return
+		return c.JSON(http.StatusInternalServerError, res)
 	}
 
 	res := newResponse(Message, "Ok", data)
-	responseJSON(w, http.StatusOK, *res)
+	return c.JSON(http.StatusOK, res)
 }
 
 // update is used for update a product
-func (p *productService) update(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPut {
-		res := newResponse(Error, "Disallowed method", nil)
-		responseJSON(w, http.StatusBadRequest, *res)
-		return
-	}
-
-	ID, err := strconv.Atoi(r.URL.Query().Get("id"))
+func (p *productService) update(c echo.Context) error {
+	ID, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
 		res := newResponse(Error, "The ID must be numerical", nil)
-		responseJSON(w, http.StatusBadRequest, *res)
-		return
+
+		return c.JSON(http.StatusBadRequest, *res)
 	}
 
 	data := model.Product{}
 	data.UpdateAt = time.Now()
-	err = json.NewDecoder(r.Body).Decode(&data)
+	err = c.Bind(&data)
 	if err != nil {
 		res := newResponse(Error, "The product does not have a correct structure", nil)
-		responseJSON(w, http.StatusBadRequest, *res)
-		return
+		return c.JSON(http.StatusBadRequest, *res)
 	}
 
 	err = p.storage.Update(ID, &data)
-	if errors.Is(err, model.ErrIDProductDoesNotExists) {
-		res := newResponse(Error, "The ID product does not exist", nil)
-		responseJSON(w, http.StatusBadRequest, *res)
-	}
 	if err != nil {
+		if errors.Is(err, model.ErrIDProductDoesNotExists) {
+			res := newResponse(Error, "The ID product does not exist", nil)
+			return c.JSON(http.StatusBadRequest, *res)
+		}
 		res := newResponse(Error, "Problem updating product", nil)
-		responseJSON(w, http.StatusInternalServerError, *res)
-		return
+		return c.JSON(http.StatusInternalServerError, *res)
 	}
 
 	res := newResponse(Message, "Product updated successfully", nil)
-	responseJSON(w, http.StatusOK, *res)
+	return c.JSON(http.StatusOK, *res)
 }
 
 // delete is used for delete a product
-func (p *productService) delete(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodDelete {
-		res := newResponse(Error, "Disallowed method", nil)
-		responseJSON(w, http.StatusBadRequest, *res)
-		return
-	}
-
-	ID, err := strconv.Atoi(r.URL.Query().Get("id"))
+func (p *productService) delete(c echo.Context) error {
+	ID, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
 		res := newResponse(Error, "The ID must be numerical", nil)
-		responseJSON(w, http.StatusBadRequest, *res)
-		return
+		return c.JSON(http.StatusBadRequest, *res)
 	}
 
 	err = p.storage.Delete(ID)
-	if errors.Is(err, model.ErrIDProductDoesNotExists) {
-		res := newResponse(Error, "The ID product does not exist", nil)
-		responseJSON(w, http.StatusBadRequest, *res)
-	}
 	if err != nil {
+		if errors.Is(err, model.ErrIDProductDoesNotExists) {
+			res := newResponse(Error, "The ID product does not exist", nil)
+			return c.JSON(http.StatusBadRequest, *res)
+		}
 		res := newResponse(Error, "Problem deleting product", nil)
-		responseJSON(w, http.StatusInternalServerError, *res)
-		return
+		return c.JSON(http.StatusInternalServerError, *res)
 	}
 
 	res := newResponse(Message, "Product successfully removed", nil)
-	responseJSON(w, http.StatusOK, *res)
+	return c.JSON(http.StatusOK, *res)
 }

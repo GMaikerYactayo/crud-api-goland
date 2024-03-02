@@ -17,16 +17,21 @@ func main() {
 
 	driver := storage.Postgres
 	storage.New(driver)
-	myStorage, err := storage.DAOProduct(driver)
+	myStorageProduct, err := storage.DAOProduct(driver)
 	if err != nil {
 		log.Fatalf("DAOProduct: %v", err)
+	}
+	myStorageUser, err := storage.DAOUser(driver)
+	if err != nil {
+		log.Fatalf("DAOUser: %v", err)
 	}
 
 	e := echo.New()
 	e.Use(middleware.Recover())
 	e.Use(middleware.Logger())
 
-	handler.RouteProduct(e, myStorage)
+	handler.RouteProduct(e, myStorageProduct)
+	handler.RuteUser(e, myStorageUser)
 
 	log.Println("Server initialized on port 8080")
 	err = e.Start(":8080")

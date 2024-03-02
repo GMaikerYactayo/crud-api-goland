@@ -7,7 +7,7 @@ import (
 
 // RouteProduct configures product-related routes in a given ServeMux,
 // using the provided storage to handle product operations.
-func RouteProduct(e *echo.Echo, storage Storage) {
+func RouteProduct(e *echo.Echo, storage ProductStorage) {
 	h := newProductService(storage)
 	product := e.Group("/v1/products")
 	product.Use(middleware.Authentication)

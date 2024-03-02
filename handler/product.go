@@ -12,11 +12,11 @@ import (
 
 // productService of product
 type productService struct {
-	storage Storage
+	storage ProductStorage
 }
 
 // newProductService return a pinter of productService
-func newProductService(s Storage) *productService {
+func newProductService(s ProductStorage) *productService {
 	return &productService{s}
 }
 

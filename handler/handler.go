@@ -4,8 +4,8 @@ import (
 	"github.com/GMaikerYactayo/crud-api-goland/model"
 )
 
-// Storage interface that must implement a db storage
-type Storage interface {
+// ProductStorage interface that must implement a db storage
+type ProductStorage interface {
 	Migrate() error
 	Create(*model.Product) error
 	GetAll() (model.Products, error)

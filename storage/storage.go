@@ -11,7 +11,7 @@ import (
 	"time"
 )
 
-// Driver of Storage
+// Driver of ProductStorage
 type Driver string
 
 // Drivers
@@ -85,13 +85,21 @@ func timeToNull(t time.Time) sql.NullTime {
 	return null
 }
 
-// DAOProduct factory of handler.Storage
-func DAOProduct(driver Driver) (handler.Storage, error) {
+// DAOProduct factory of handler.ProductStorage
+func DAOProduct(driver Driver) (handler.ProductStorage, error) {
 	switch driver {
 	case Postgres:
 		return newPsqlProduct(db), nil
 	case MySQL:
 		return newMySQLProduct(db), nil
+	default:
+		return nil, fmt.Errorf("driver not implemented")
+	}
+}
+func DAOUser(driver Driver) (handler.UserStorage, error) {
+	switch driver {
+	case Postgres:
+		return newPsqlUser(db), nil
 	default:
 		return nil, fmt.Errorf("driver not implemented")
 	}
